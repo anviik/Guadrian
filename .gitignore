@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Env / secrets
+.env
+
+# Sandbox runtime artifacts
+sandbox/
+
+# Node / frontend (Step 6)
+node_modules/
+dist/
+
+# OS
+.DS_Store
