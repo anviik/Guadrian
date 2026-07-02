@@ -69,9 +69,16 @@ def check_policy_rules(action: dict, policy: Policy) -> Tuple[str, str]:
     confirmed = action.get("confirmed", False)
     is_filesystem = tool not in policy.paid_api_tools
 
-    # BLOCK: never operate on a filesystem path outside the sandbox.
+    # BLOCK: never operate on a filesystem path outside the sandbox. This check
+    # outranks everything, including human approval — the sandbox boundary is the
+    # one rule nobody can waive.
     if is_filesystem and target and not _within_sandbox(target, policy.sandbox_root):
         return "block", f"path '{target}' is outside the sandbox"
+
+    # ALLOW: a human explicitly approved this exact action after a PAUSE verdict.
+    # Checked after the sandbox rule, before everything else.
+    if action.get("human_approved"):
+        return "allow", "explicitly approved by a human reviewer"
 
     # BLOCK: never modify more than the allowed number of records in one action.
     if records > policy.max_records:

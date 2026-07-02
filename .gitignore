@@ -8,8 +8,8 @@ venv/
 # Env / secrets
 .env
 
-# Sandbox runtime artifacts
-sandbox/
+# Sandbox runtime artifacts (repo root only — backend/sandbox/ is a package)
+/sandbox/
 
 # Node / frontend (Step 6)
 node_modules/

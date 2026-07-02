@@ -79,6 +79,18 @@ def test_outside_sandbox_beats_destructive():
     assert verdict({"tool": "delete_all", "target": "/important"}) == "block"
 
 
+# --- human approval ----------------------------------------------------------
+
+def test_human_approved_action_is_allowed():
+    # An action a human explicitly approved after a PAUSE goes through.
+    assert verdict({"tool": "send_email", "target": "a@b.com", "human_approved": True}) == "allow"
+
+
+def test_human_approval_cannot_waive_sandbox_boundary():
+    # The sandbox rule outranks approval — nobody can waive it.
+    assert verdict({"tool": "delete_file", "target": "/etc/hosts", "human_approved": True}) == "block"
+
+
 # --- policy.yaml loads and parses ------------------------------------------
 
 def test_shipped_policy_file_loads():
