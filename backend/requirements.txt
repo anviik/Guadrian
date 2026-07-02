@@ -1,0 +1,12 @@
+# Step 1 (graph skeleton) needs only langgraph.
+langgraph>=0.2
+
+# Step 2 (policy engine):
+pyyaml>=6              # policy.yaml rule engine
+pytest>=8              # policy unit tests
+
+# Later steps (kept here so the environment is ready):
+anthropic>=0.40        # Step 3: real worker + claude-sonnet-4-6 LLM judge
+python-dotenv>=1       # Step 3: load ANTHROPIC_API_KEY from .env
+fastapi>=0.110         # Step 5: REST + WebSocket server
+uvicorn[standard]>=0.29  # Step 5: ASGI server
