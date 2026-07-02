@@ -4,11 +4,11 @@ This topology IS the architecture — it is not a placeholder. The conditional e
 off the guardian is what makes oversight structural: the worker's output has no edge
 that reaches `execute` without first passing through `guardian`.
 
-  START -> worker
-  worker   --(has action?)-->  guardian   |  (none) --> END   [skeleton-only convenience]
-  guardian --(verdict)----->  { allow: execute, block: worker, pause: END }
-  execute  -------------->  worker         (continue to the next proposed action)
-  rollback -------------->  worker         (defined for completeness; unused in Step 1)
+    START -> worker
+    worker   --(has action?)-->  guardian   |  (none) --> END   [skeleton-only convenience]
+    guardian --(verdict)----->  { allow: execute, block: worker, pause: END }
+    execute  -------------->  worker         (continue to the next proposed action)
+    rollback -------------->  worker         (defined for completeness; unused in Step 1)
 """
 
 from __future__ import annotations

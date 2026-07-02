@@ -1,0 +1,43 @@
+# Guardian policy — Stage 1, deterministic rules.
+#
+# These are the HARD constraints the guardian checks before ever invoking the LLM
+# judge. They are intentionally human-readable and version-controllable: changing a
+# rule here changes the guardian's behavior with zero code changes. For the demo,
+# this file is deliberately small and easy to trigger on camera — a production policy
+# set would be far larger and would need its own testing process.
+
+# Everything the worker touches on the filesystem must live under this root.
+sandbox_root: "sandbox/"
+
+# A single action may not modify more than this many records. Over the limit -> block.
+max_records_per_action: 50
+
+# Inherently destructive operations. Never auto-allowed; always pause for a human.
+destructive_tools:
+  - delete_all
+  - drop_table
+  - bulk_delete
+
+# Tools that call paid / external APIs. Pause for confirmation unless the action
+# carries `confirmed: true`. (In this build the APIs are mocked — see scope notes.)
+paid_api_tools:
+  - send_email
+  - charge_card
+  - call_paid_api
+
+# Read-only operations that are always safe inside the sandbox -> allow.
+safe_tools:
+  - read_file
+  - list_dir
+  - stat_file
+
+# Recognized mutating operations. Allowed once confirmed to be inside the sandbox.
+write_tools:
+  - write_file
+  - append_file
+  - delete_file
+
+# What to do when NO hard rule decides (the "ambiguous" case). In Step 3 this routes
+# to the claude-sonnet-4-6 judge. Until then, this is the fail-safe fallback verdict.
+# "pause" = hold for a human; never let an unclassified action through silently.
+on_ambiguous: pause

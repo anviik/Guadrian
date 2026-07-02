@@ -4,10 +4,10 @@ STEP 1 SCOPE: these nodes prove the control flow only. Nothing here touches a re
 file or calls a real model. Each stub is replaced by a real implementation in a
 later step (see docs/03-roadmap.md):
 
-  worker_node   -> real Claude API call with tool definitions          (Step 3)
-  guardian_node -> YAML policy rules + claude-sonnet-4-6 LLM judge      (Steps 2-3)
-  execute_node  -> real filesystem write + real snapshot capture        (Step 4)
-  rollback_node -> real restore_state() from a popped snapshot           (Step 4)
+    worker_node   -> real Claude API call with tool definitions          (Step 3)
+    guardian_node -> YAML policy rules + claude-sonnet-4-6 LLM judge      (Steps 2-3)
+    execute_node  -> real filesystem write + real snapshot capture        (Step 4)
+    rollback_node -> real restore_state() from a popped snapshot           (Step 4)
 
 The point of Step 1 is to make the architecture observable: watch a BLOCK bounce
 back to the worker and a PAUSE halt the run, and you've proven the worker cannot
@@ -18,10 +18,14 @@ from __future__ import annotations
 
 from collections import deque
 
+from policy.engine import check_policy_rules, load_policy
+
 from .state import AgentState
 
-SANDBOX_ROOT = "sandbox/"
-MAX_RECORDS = 50  # mirror of a future policy.yaml hard limit
+# Load the policy once at import. Editing policy.yaml now changes guardian behavior
+# with zero code changes — the sandbox root, record limit, and tool lists all live
+# there (policy/policy.yaml), not in this file.
+_POLICY = load_policy()
 
 
 # ---------------------------------------------------------------------------
@@ -30,13 +34,13 @@ MAX_RECORDS = 50  # mirror of a future policy.yaml hard limit
 # A real worker loops (propose -> maybe blocked -> propose again) driven by Claude.
 # With no model in the skeleton, we feed a fixed script so the run is deterministic
 # and terminates. This whole block disappears when the real worker lands in Step 3.
-# The script is chosen to exercise all three verdict paths on camera-friendly logic.
+# The script exercises four verdict paths against the policy engine.
 # ---------------------------------------------------------------------------
 _DEMO_SCRIPT = deque([
-    {"tool": "write_file",  "target": "sandbox/notes/a.txt", "content": "hello"},
-    {"tool": "write_file",  "target": "sandbox/notes/b.txt", "content": "world"},
-    {"tool": "delete_file", "target": "/etc/hosts"},          # outside sandbox -> block
-    {"tool": "delete_all",  "target": "sandbox/"},            # destructive    -> pause
+    {"tool": "write_file",   "target": "sandbox/notes/a.txt", "content": "hello"},  # allow
+    {"tool": "read_file",    "target": "sandbox/notes/a.txt"},                       # allow (safe)
+    {"tool": "delete_file",  "target": "sandbox/../etc/hosts"},                      # block (sandbox escape)
+    {"tool": "sync_to_cloud", "target": "sandbox/notes/"},                           # ambiguous -> fail-safe
 ])
 
 
@@ -60,24 +64,22 @@ def worker_node(state: AgentState) -> dict:
 
 
 def guardian_node(state: AgentState) -> dict:
-    """Evaluate the proposed action and return a verdict.
+    """Evaluate the proposed action against the policy and return a verdict.
 
-    Skeleton: a few hard `if`s standing in for the future two-stage guardian. In
-    Step 2 the path/limit checks move into policy.yaml; in Step 3 an `ambiguous`
-    result escalates to the claude-sonnet-4-6 judge. For now there is no ambiguous
-    path — every action resolves to allow/block/pause deterministically.
+    Stage 1 (this step): the deterministic rule engine in policy/engine.py, driven by
+    policy.yaml, returns allow / block / pause / ambiguous. Stage 2 (Step 3) will send
+    `ambiguous` actions to the claude-sonnet-4-6 judge for drift detection. Until the
+    judge exists, an ambiguous action takes the policy's fail-safe verdict so nothing
+    unclassified ever slips through silently.
     """
     action = state["proposed_action"] or {}
-    target = action.get("target", "")
-    tool = action.get("tool", "")
-    n_records = action.get("records", 0)
+    verdict, reason = check_policy_rules(action, _POLICY)
 
-    if tool == "delete_all" or n_records > MAX_RECORDS:
-        verdict, reason = "pause", "destructive / over record limit"
-    elif not target.startswith(SANDBOX_ROOT):
-        verdict, reason = "block", "path outside sandbox"
-    else:
-        verdict, reason = "allow", "path inside sandbox"
+    if verdict == "ambiguous":
+        # TODO(Step 3): replace this fallback with the claude-sonnet-4-6 judge call.
+        fallback = _POLICY.on_ambiguous
+        reason = f"{reason}; no judge yet -> fail-safe {fallback.upper()}"
+        verdict = fallback
 
     arrow = {"allow": "-> execute", "block": "-> back to worker", "pause": "-> waiting for human, run ends"}
     _log("guardian", f"verdict: {verdict.upper():<5} ({reason}) {arrow[verdict]}")
