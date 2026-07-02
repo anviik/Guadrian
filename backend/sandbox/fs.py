@@ -147,6 +147,12 @@ class Sandbox:
         path.write_text(f"[mock {tool}]\ntarget: {target}\ncontent: {content}\n")
         return f"mock '{tool}' recorded to {effect}"
 
+    def wipe(self) -> None:
+        """Reset the sandbox to empty — used by the demo server's reset endpoint."""
+        import shutil
+        shutil.rmtree(self.root_path)
+        self.root_path.mkdir(parents=True, exist_ok=True)
+
     # -- demo/debug helper ------------------------------------------------------
 
     def tree(self) -> str:
