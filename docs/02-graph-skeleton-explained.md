@@ -1,5 +1,12 @@
 # The Graph Skeleton, Explained (private notes)
 
+> **Update — Step 2 has landed.** The "few `if` checks in Python" described below
+> are gone: the guardian now calls the real rule engine in `backend/policy/`
+> (`policy.yaml` + `check_policy_rules()`), which adds a fourth verdict,
+> `ambiguous`, that fail-safes to PAUSE until the Step 3 judge exists. The demo
+> script changed with it — see the corrected list below. Everything else here
+> still describes the code accurately.
+
 This documents *exactly* what we scaffold in step 1. The goal of this step is narrow
 and deliberate: **prove the architecture before building anything expensive.** If the
 graph routes correctly and the worker provably cannot bypass the guardian, the rest
@@ -40,35 +47,33 @@ so it's obvious it's scaffolding.
 
 ## The demo script we'll run
 
-The skeleton ships with a handful of proposed actions chosen to exercise all three
-verdict paths on camera-friendly logic:
+The skeleton ships with a handful of proposed actions chosen to exercise the verdict
+paths on camera-friendly logic (as of Step 2, evaluated by the real rule engine):
 
-1. `write_file` inside `sandbox/` → **allow** → execute (fake), snapshot pushed.
-2. `write_file` inside `sandbox/` → **allow** → execute (fake).
-3. `delete_file` *outside* `sandbox/` → **block** → bounces back to worker.
-4. `delete_all` (a deliberately scary action) → **pause** → run halts for a human.
+1. `write_file` inside `sandbox/` → **allow** (recognized write tool, path in
+   sandbox) → execute (fake), snapshot pushed.
+2. `read_file` inside `sandbox/` → **allow** (read-only safe tool).
+3. `delete_file` targeting `sandbox/../etc/hosts` → **block** (normpath catches the
+   sandbox escape) → bounces back to worker.
+4. `sync_to_cloud` → matches no hard rule → **ambiguous** → fail-safe **pause** →
+   run halts for a human. In Step 3 this exact case routes to the LLM judge instead.
 
-The stub guardian logic that produces those verdicts:
-
-- target path not under `sandbox/` → `block`
-- tool == `delete_all` (or affects > N records) → `pause`
-- otherwise → `allow`
-
-This is a miniature preview of the real two-stage guardian: the path/limit checks are
-exactly the kind of hard rule that will move into `policy.yaml`.
+These verdicts come from `check_policy_rules()` in `backend/policy/engine.py`,
+driven entirely by `policy.yaml` — change the YAML and the verdicts change with
+zero code edits.
 
 ## How to read the output
 
 Running `python backend/main.py` prints a trace like:
 
 ```
-[worker]   proposes: write_file sandbox/notes/a.txt
-[guardian] verdict: ALLOW  (path inside sandbox)
-[execute]  snapshot pushed (stack depth 1); would write sandbox/notes/a.txt
-[worker]   proposes: delete_file /etc/hosts
-[guardian] verdict: BLOCK  (path outside sandbox) -> back to worker
-[worker]   proposes: delete_all
-[guardian] verdict: PAUSE  (destructive) -> waiting for human, run ends
+[worker  ] proposes: write_file sandbox/notes/a.txt
+[guardian] verdict: ALLOW ('write_file' writes inside the sandbox) -> execute
+[execute ] snapshot pushed (stack depth 1); would write sandbox/notes/a.txt
+[worker  ] proposes: delete_file sandbox/../etc/hosts
+[guardian] verdict: BLOCK (path 'sandbox/../etc/hosts' is outside the sandbox) -> back to worker
+[worker  ] proposes: sync_to_cloud sandbox/notes/
+[guardian] verdict: PAUSE ('sync_to_cloud' matches no hard rule; no judge yet -> fail-safe PAUSE) -> waiting for human, run ends
 ```
 
 When you see a BLOCK route back to `worker` and a PAUSE stop the run, the core thesis

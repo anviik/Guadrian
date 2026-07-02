@@ -21,18 +21,22 @@ a probabilistic LLM judge) is layered defense-in-depth, not a formal guarantee.
 
 ## Status
 
-**Step 1 of 7 — graph skeleton.** The LangGraph state machine runs end-to-end in the
-terminal with stub nodes, proving the control flow (allow / block / pause routing).
-Real worker, LLM judge, policy engine, filesystem rollback, and the React UI follow.
+**Steps 1–2 of 7 complete — graph skeleton + rule engine.** The LangGraph state
+machine runs end-to-end in the terminal, and the guardian's Stage 1 is real: a
+deterministic rule engine driven by `policy/policy.yaml` (sandbox containment,
+record limits, destructive / paid-API tool handling), covered by unit tests.
+Actions no hard rule classifies fail-safe to PAUSE until the Step 3 LLM judge
+lands. Real worker, LLM judge, filesystem rollback, and the React UI follow.
 See `docs/` for the full walkthrough and roadmap.
 
-## Run the skeleton
+## Run it
 
 ```bash
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python main.py
+python main.py            # scripted demo run with a verdict trace
+python -m pytest tests/   # policy engine unit tests
 ```
 
 ## Layout
@@ -42,7 +46,8 @@ backend/
   graph/     # AgentState + nodes + StateGraph wiring   (Step 1, working)
   agents/    # real worker + guardian                    (Step 3)
   sandbox/   # filesystem target + rollback stack        (Step 4)
-  policy/    # policy.yaml hard rules                     (Step 2)
+  policy/    # policy.yaml + deterministic rule engine   (Step 2, working)
+  tests/     # policy engine unit tests                  (Step 2, working)
   main.py    # terminal entry point for the skeleton
 frontend/    # React + Vite + TS live visualization      (Step 6)
 docs/        # private walkthrough notes + roadmap

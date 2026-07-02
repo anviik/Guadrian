@@ -3,16 +3,18 @@
 The design doc's timeline, reordered slightly to frontload technical/demo risk. We do
 the boring-but-critical core first; the UI is a window onto state we'll already have.
 
-## Step 1 — Graph skeleton  ← we are doing this now
+## Step 1 — Graph skeleton  ✅ done (merged in PR #1)
 Runnable in terminal. Stub nodes. Proves worker-can't-bypass-guardian and the three
 verdict paths. **Deliverable:** `python backend/main.py` prints a clean verdict trace.
 
-## Step 2 — Rule engine + YAML policy  (doc Days 1–2 finish)
-Move the stub guardian `if`s into `policy.yaml` + a real `check_policy_rules()` that
-returns `allow` / `block` / `ambiguous`. Deterministic, fully unit-testable, no API
-key needed. **Deliverable:** policy changes alter verdicts with zero code changes.
+## Step 2 — Rule engine + YAML policy  ✅ done (merged in PR #1)
+Moved the stub guardian `if`s into `policy.yaml` + a real `check_policy_rules()` that
+returns `allow` / `block` / `pause` / `ambiguous`. Deterministic, fully unit-testable
+(11 tests in `backend/tests/`), no API key needed. Ambiguous fail-safes to `pause`
+via `on_ambiguous` until the judge exists. **Deliverable met:** policy changes alter
+verdicts with zero code changes.
 
-## Step 3 — Real worker + LLM judge  (doc Days 1–4)
+## Step 3 — Real worker + LLM judge  (doc Days 1–4)  ← next
 - Worker: real Claude call with tool definitions; it proposes, never executes.
 - Judge: on `ambiguous`, call `claude-sonnet-4-6` with task + action + history; parse
   `ALLOW/BLOCK/PAUSE` + reason. This is where drift detection becomes real.

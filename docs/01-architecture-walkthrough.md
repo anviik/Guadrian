@@ -29,7 +29,7 @@ UI last).
 │  SANDBOX                                 [Days 3–4, partial]      │
 │  • Local filesystem (the real target the worker affects)         │
 │  • Rollback stack (LIFO of snapshots)                            │
-│  • Policy config (YAML — hard deterministic rules)               │
+│  • Policy config (YAML — hard deterministic rules)  ✅ Step 2     │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
