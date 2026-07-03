@@ -20,7 +20,7 @@ Endpoints:
     POST /api/reset    wipe the sandbox for a clean demo
     WS   /ws           live event stream
 
-If frontend/dist exists (npm run build), it is served at / for a one-command demo.
+If frontend/out exists (npm run build), it is served at / for a one-command demo.
 """
 
 from __future__ import annotations

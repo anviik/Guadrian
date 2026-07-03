@@ -36,12 +36,15 @@ run/approve/deny/reset. PAUSE holds the action for human review; approve resumes
 `human_approved` (the sandbox rule still outranks it). Verified with a CLI ws client
 before any React. **Deliverable met.**
 
-## Step 6 — Frontend  ✅ done (overhauled to Next.js + shadcn/ui)
-Originally Vite + React; rebuilt as Next.js 16 static export with shadcn/ui and a
-cyberpunk-clean theme. Landing page at `/`, live console at `/console/`: agent graph
-with verdict-colored pulsing edges, action-log cards (verdict + deciding stage +
-result), approval modal on PAUSE, sandbox panel where rollback is visible.
-`npm run build` exports to `out/`, served by the backend at / for a one-command demo.
+## Step 6 — Frontend  ✅ done (Next.js + shadcn/ui, editorial redesign)
+Originally Vite + React; rebuilt as a Next.js 16 static export with shadcn/ui, then
+redesigned in an editorial spec-sheet style: Instrument Serif display type, hairline
+rules instead of cards, verdict stamps, paper (light) / ink (dark) themes via
+next-themes, lilac accent with matcha as ALLOW. Landing page at `/`, live console at
+`/console/`: schematic agent graph with verdict-colored pulsing edges, ledger-style
+action log (numbered entries, stamp verdicts, deciding stage), approval modal on
+PAUSE, sandbox panel where rollback is visible. `npm run build` exports to `out/`,
+served by the backend at / for a one-command demo.
 
 ## Step 7 — Polish + submission  ← remaining
 - [ ] Record the demo video (shot list: run → block bounce → rollback revert →

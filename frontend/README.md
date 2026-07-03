@@ -1,18 +1,21 @@
 # frontend/ — live visualization (Next.js + shadcn/ui)
 
-Next.js 16 (App Router, static export) + Tailwind v4 + shadcn/ui, themed
-cyberpunk-clean: neon verdict colors reserved for meaning on an otherwise quiet,
-Apple-inspired dark canvas.
+Next.js 16 (App Router, static export) + Tailwind v4 + shadcn/ui, designed as an
+editorial spec sheet: Instrument Serif display type, mono data labels, hairline
+rules instead of cards, and inked verdict stamps. Two themes via next-themes —
+warm paper (light) and deep ink (dark) — with a lilac accent; matcha green is the
+ALLOW color, plum is ROLLBACK.
 
-- **Landing page** (`/`) — what Guardian is, the three-verdict model, and the
-  scope-honesty statement, with a CTA into the console.
+- **Landing page** (`/`) — asymmetric hero + spec column, scrolling verdict
+  ticker, numbered mechanism index (01 Intercept / 02 Evaluate / 03 Roll back),
+  typographic flow diagram, and the scope-honesty footnote.
 - **Console** (`/console/`) — subscribes once to the backend WebSocket and renders
   each event live (no polling):
-  - *Agent graph* — SVG layout (worker → guardian → execute, human + rollback
-    branches); edges pulse in the verdict color: green ALLOW, red BLOCK, amber
-    PAUSE, purple ROLLBACK.
-  - *Action log* — a card per judged action: tool, verdict badge (with deciding
-    stage: rules / judge / human), reason, execution result.
+  - *Agent graph* — schematic SVG (worker → guardian → execute, human + rollback
+    branches); edges pulse in the verdict color: matcha ALLOW, red BLOCK, amber
+    PAUSE, plum ROLLBACK.
+  - *Ledger* — a numbered entry per judged action: tool, verdict stamp (with
+    deciding stage: rules / judge / human), reason, execution result.
   - *Approval modal* — raised on PAUSE; Approve resumes with `human_approved`
     (the sandbox rule still outranks it), Deny records the denial.
   - *Sandbox panel* — the sandbox contents; a rollback is visible as the file

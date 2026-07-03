@@ -5,20 +5,20 @@ UI last).
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  FRONTEND  (React + Vite + TS)          [Days 5–6, not yet]       │
+│  FRONTEND  (Next.js + shadcn/ui, TS)     ✅ working                │
 │  • Live agent graph: worker ●──edge──● guardian                   │
 │  • Action log panel: description, verdict, timestamp              │
 │  • Human approval modal: appears on a PAUSE verdict               │
 └───────────────▲───────────────────────────────────────────────── ┘
                 │ WebSocket (state deltas, no polling)
 ┌───────────────┴─────────────────────────────────────────────────┐
-│  BACKEND  (FastAPI)                      [Days 5–6, not yet]      │
+│  BACKEND  (FastAPI)                      ✅ working                │
 │  • REST endpoints + WebSocket broadcaster                        │
 │  • Hosts the LangGraph runtime and streams each state transition │
 └───────────────▲───────────────────────────────────────────────── ┘
                 │ runs
 ┌───────────────┴─────────────────────────────────────────────────┐
-│  AGENTS / GRAPH  (LangGraph)             ← WE START HERE          │
+│  AGENTS / GRAPH  (LangGraph)             ✅ working                │
 │  StateGraph with 4 nodes + 1 conditional edge:                   │
 │    worker → guardian →(allow) execute                            │
 │                       →(block) worker                            │
@@ -26,7 +26,7 @@ UI last).
 └───────────────▲───────────────────────────────────────────────── ┘
                 │ acts on
 ┌───────────────┴─────────────────────────────────────────────────┐
-│  SANDBOX                                 [Days 3–4, partial]      │
+│  SANDBOX                                 ✅ working                │
 │  • Local filesystem (the real target the worker affects)         │
 │  • Rollback stack (LIFO of snapshots)                            │
 │  • Policy config (YAML — hard deterministic rules)  ✅ Step 2     │

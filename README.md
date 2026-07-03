@@ -79,7 +79,7 @@ backend/
   policy/    # policy.yaml + deterministic rule engine (Stage 1)
   tests/     # policy, sandbox, and end-to-end graph tests
   main.py    # terminal demo entry point
-  server.py  # FastAPI + WebSocket streaming server (serves frontend/dist)
+  server.py  # FastAPI + WebSocket streaming server (serves frontend/out)
 frontend/    # Next.js + shadcn/ui: landing page + live console (graph, log, approvals)
 docs/        # private walkthrough notes + roadmap
 sandbox/     # (created at runtime, gitignored) the worker's target environment
