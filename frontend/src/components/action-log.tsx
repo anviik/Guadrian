@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Badge } from "@/components/ui/badge";
 import type { LogEntry } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const VERDICT_STYLE: Record<string, { border: string; badge: string }> = {
-  allow: { border: "border-l-allow", badge: "bg-allow/10 text-allow" },
-  block: { border: "border-l-block", badge: "bg-block/10 text-block" },
-  pause: { border: "border-l-pause", badge: "bg-pause/10 text-pause" },
-  rollback: { border: "border-l-rollback", badge: "bg-rollback/10 text-rollback" },
-  denied: { border: "border-l-block", badge: "bg-block/10 text-block" },
+const VERDICT_COLOR: Record<string, string> = {
+  allow: "text-allow",
+  block: "text-block",
+  pause: "text-pause",
+  rollback: "text-rollback",
+  denied: "text-block",
 };
 
 export default function ActionLog(props: { log: LogEntry[] }) {
@@ -21,45 +20,45 @@ export default function ActionLog(props: { log: LogEntry[] }) {
   }, [props.log.length]);
 
   return (
-    <div className="flex max-h-[560px] flex-col gap-2.5 overflow-y-auto pr-1">
+    <div className="flex max-h-[600px] flex-col overflow-y-auto border border-border bg-card">
       {props.log.length === 0 && (
-        <div className="py-16 text-center text-sm text-muted-foreground">
-          No actions yet — start a run.
+        <div className="py-16 text-center font-mono text-xs text-muted-foreground">
+          — no entries yet · start a run —
         </div>
       )}
       {props.log.map((e, i) => (
-        <Entry key={i} entry={e} />
+        <Entry key={i} entry={e} n={i + 1} />
       ))}
       <div ref={endRef} />
     </div>
   );
 }
 
-function Entry({ entry }: { entry: LogEntry }) {
-  const style = VERDICT_STYLE[entry.verdict] ?? VERDICT_STYLE.pause;
+function Entry({ entry, n }: { entry: LogEntry; n: number }) {
+  const color = VERDICT_COLOR[entry.verdict] ?? "text-pause";
   const title = entry.action
     ? `${entry.action.tool}  ${entry.action.target ?? ""}`
     : entry.verdict === "rollback"
-      ? "⟲ rollback"
+      ? "⟲ restore from snapshot"
       : "—";
 
   return (
-    <div
-      className={cn(
-        "animate-in fade-in slide-in-from-bottom-2 rounded-lg border border-border/60 border-l-4 bg-card/70 px-4 py-3 duration-300",
-        style.border,
-      )}
-    >
+    <div className="animate-in fade-in slide-in-from-bottom-1 border-b border-border px-4 py-3 duration-300 last:border-b-0">
       <div className="flex items-center justify-between gap-3">
-        <span className="truncate font-mono text-[13px]">{title}</span>
-        <Badge className={cn("shrink-0 rounded-full font-mono text-[10px] tracking-wider", style.badge)}>
+        <span className="flex min-w-0 items-baseline gap-3">
+          <span className="spec shrink-0">{String(n).padStart(2, "0")}</span>
+          <span className="truncate font-mono text-[13px]">{title}</span>
+        </span>
+        <span className={cn("stamp shrink-0", color)}>
           {entry.verdict.toUpperCase()}
-          {entry.stage && entry.stage !== "rules" ? ` · ${entry.stage}` : ""}
-        </Badge>
+          {entry.stage && entry.stage !== "rules" ? ` · ${entry.stage.toUpperCase()}` : ""}
+        </span>
       </div>
-      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{entry.reason}</p>
+      <p className="mt-1.5 pl-8 text-xs leading-relaxed text-muted-foreground">
+        {entry.reason}
+      </p>
       {entry.result !== undefined && (
-        <pre className="mt-2 overflow-x-auto rounded-md bg-background/80 px-3 py-2 font-mono text-[11.5px] text-allow">
+        <pre className="ml-8 mt-2 overflow-x-auto border-l-2 border-allow/50 bg-muted/50 px-3 py-2 font-mono text-[11.5px] leading-relaxed">
           {truncate(entry.result, 160)}
         </pre>
       )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { PauseCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,22 +25,26 @@ export default function ApprovalModal(props: {
   return (
     <Dialog open>
       <DialogContent
-        className="border-pause/50 sm:max-w-md [&>button]:hidden"
+        className="rounded-none border-pause/60 sm:max-w-md [&>button]:hidden"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-pause">
-            <PauseCircle className="size-5" /> Human review required
+          <DialogTitle className="flex items-center gap-3">
+            <span className="stamp text-pause">PAUSE</span>
+            <span className="font-display text-xl font-normal tracking-tight">
+              A human decides.
+            </span>
           </DialogTitle>
           <DialogDescription className="text-left">{props.reason}</DialogDescription>
         </DialogHeader>
 
-        <pre className="overflow-x-auto rounded-lg border border-border/60 bg-background/80 px-4 py-3 font-mono text-xs leading-relaxed">
+        <pre className="overflow-x-auto border border-border bg-muted/50 px-4 py-3 font-mono text-xs leading-relaxed">
           {JSON.stringify(props.action, null, 2)}
         </pre>
 
         <Input
+          className="rounded-none border-0 border-b border-input bg-transparent px-1 font-mono text-[13px] shadow-none focus-visible:ring-0 focus-visible:border-primary"
           placeholder="optional deny reason…"
           value={denyReason}
           onChange={(e) => setDenyReason(e.target.value)}
@@ -50,13 +53,13 @@ export default function ApprovalModal(props: {
         <DialogFooter className="gap-2">
           <Button
             variant="outline"
-            className="border-block/50 text-block hover:bg-block/10 hover:text-block"
+            className="rounded-none border-block/60 text-block hover:bg-block/10 hover:text-block"
             onClick={() => props.onDeny(denyReason)}
           >
             Deny
           </Button>
           <Button
-            className="bg-allow font-semibold text-background hover:bg-allow/85"
+            className="rounded-none border border-foreground bg-foreground font-medium text-background hover:bg-transparent hover:text-foreground"
             onClick={props.onApprove}
           >
             Approve &amp; execute
@@ -64,7 +67,8 @@ export default function ApprovalModal(props: {
         </DialogFooter>
 
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Approval cannot waive the sandbox boundary — that rule outranks everyone.
+          <span className="font-mono">*</span> approval cannot waive the sandbox
+          boundary — that rule outranks everyone.
         </p>
       </DialogContent>
     </Dialog>

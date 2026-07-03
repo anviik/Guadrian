@@ -1,47 +1,81 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@custom-variant dark (&:is(.dark *));
+
 /* ------------------------------------------------------------------ */
-/* Guardian theme: cyberpunk accents on an Apple-clean dark canvas.    */
-/* Neon is reserved for meaning (verdicts, live state); everything     */
-/* else stays quiet — glass panels, hairline borders, generous space.  */
+/* Guardian — editorial control-room.                                   */
+/* Two papers: warm paper (light) and deep ink (dark). One accent:      */
+/* lilac. Verdicts carry their own semantic hues (matcha = allow).      */
+/* Type does the design work: serif display, mono for data, hairline    */
+/* rules instead of boxes.                                              */
 /* ------------------------------------------------------------------ */
 
 :root {
-  /* canvas */
-  --background: #06070b;
-  --foreground: #e7eaf0;
+  --background: #f4f1e9;
+  --foreground: #1b1820;
+  --card: #faf8f2;
+  --card-foreground: #1b1820;
+  --popover: #faf8f2;
+  --popover-foreground: #1b1820;
 
-  /* surfaces */
-  --card: #0c0e15;
-  --card-foreground: #e7eaf0;
-  --popover: #0c0e15;
-  --popover-foreground: #e7eaf0;
+  --primary: #6a54c4; /* deep lilac on paper */
+  --primary-foreground: #f7f5ff;
+  --secondary: #e9e4d8;
+  --secondary-foreground: #1b1820;
+  --muted: #ece8dd;
+  --muted-foreground: #6d6876;
+  --accent: #e9e4d8;
+  --accent-foreground: #1b1820;
+  --destructive: #b3453d;
+  --destructive-foreground: #fff5f4;
 
-  /* neon cyan is the product color */
-  --primary: #22d3ee;
-  --primary-foreground: #051014;
-  --secondary: #141824;
-  --secondary-foreground: #e7eaf0;
-  --muted: #12151f;
-  --muted-foreground: #8b93a7;
-  --accent: #141824;
-  --accent-foreground: #e7eaf0;
-  --destructive: #f85149;
-  --destructive-foreground: #fff1f0;
+  --border: rgba(27, 24, 32, 0.16);
+  --input: rgba(27, 24, 32, 0.24);
+  --ring: rgba(106, 84, 196, 0.55);
 
-  --border: rgba(139, 147, 167, 0.16);
-  --input: rgba(139, 147, 167, 0.22);
-  --ring: rgba(34, 211, 238, 0.6);
+  --radius: 0.25rem;
 
-  --radius: 0.75rem;
+  /* verdict palette */
+  --allow: #5d7a38;    /* matcha */
+  --block: #b3453d;
+  --pause: #9a7418;
+  --rollback: #96549e; /* plum, distinct from brand lilac */
+  --propose: #4f6a92;
 
-  /* verdict palette (shared by graph, badges, cards) */
-  --allow: #34d399;
-  --block: #fb5e57;
-  --pause: #fbbf24;
-  --rollback: #c084fc;
-  --propose: #38bdf8;
+  --stamp-bg: rgba(27, 24, 32, 0.04);
+}
+
+.dark {
+  --background: #100e16;
+  --foreground: #ece9e2;
+  --card: #16131f;
+  --card-foreground: #ece9e2;
+  --popover: #16131f;
+  --popover-foreground: #ece9e2;
+
+  --primary: #b7a5f0; /* soft lilac on ink */
+  --primary-foreground: #17111f;
+  --secondary: #201c2c;
+  --secondary-foreground: #ece9e2;
+  --muted: #1b1826;
+  --muted-foreground: #918c9e;
+  --accent: #201c2c;
+  --accent-foreground: #ece9e2;
+  --destructive: #e2756c;
+  --destructive-foreground: #1c0f0e;
+
+  --border: rgba(236, 233, 226, 0.14);
+  --input: rgba(236, 233, 226, 0.2);
+  --ring: rgba(183, 165, 240, 0.55);
+
+  --allow: #a9c883;    /* matcha, dark */
+  --block: #e2756c;
+  --pause: #d3a94c;
+  --rollback: #cf9bd8;
+  --propose: #8aa7cc;
+
+  --stamp-bg: rgba(236, 233, 226, 0.05);
 }
 
 @theme inline {
@@ -71,13 +105,14 @@
   --color-rollback: var(--rollback);
   --color-propose: var(--propose);
 
-  --font-sans: var(--font-geist-sans), -apple-system, "SF Pro Text", sans-serif;
+  --font-sans: var(--font-geist-sans), -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
 }
 
 body {
@@ -85,52 +120,85 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
-/* faint cyber-grid used behind the landing hero and console header */
-.bg-grid {
-  background-image:
-    linear-gradient(rgba(34, 211, 238, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34, 211, 238, 0.045) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 40%, transparent 100%);
+/* editorial helpers ---------------------------------------------------- */
+
+.font-display {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
-/* neon text — used sparingly */
-.text-glow-cyan { text-shadow: 0 0 24px rgba(34, 211, 238, 0.45); }
-
-/* glass panel */
-.glass {
-  background: linear-gradient(180deg, rgba(20, 24, 36, 0.72), rgba(12, 14, 21, 0.86));
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--border);
+/* mono micro-label: 01 / INTERCEPT */
+.spec {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
 }
+
+/* verdict stamp — like an inked audit mark */
+.stamp {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 3px 9px;
+  border: 1.2px solid currentColor;
+  border-radius: 2px;
+  background: var(--stamp-bg);
+  white-space: nowrap;
+}
+
+/* hairline rules do the layout work */
+.rule-t { border-top: 1px solid var(--border); }
+
+/* infinite ticker */
+.ticker { overflow: hidden; white-space: nowrap; }
+.ticker-track {
+  display: inline-block;
+  padding-left: 0;
+  animation: ticker 28s linear infinite;
+}
+@keyframes ticker { to { transform: translateX(-50%); } }
+
+/* ink underline for links, editorial style */
+.ink-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--border);
+  transition: text-decoration-color 0.2s ease;
+}
+.ink-link:hover { text-decoration-color: var(--primary); }
 
 /* ---- live graph edge animation (SVG) ---- */
 .edge {
   fill: none;
-  stroke: rgba(139, 147, 167, 0.28);
-  stroke-width: 1.5;
+  stroke: var(--border);
+  stroke-width: 1.4;
   transition: stroke 0.3s ease;
 }
-.edge-faint { stroke-dasharray: 3 5; opacity: 0.55; }
+.edge-faint { stroke-dasharray: 3 5; opacity: 0.6; }
 .edge-active {
-  stroke-width: 2.5;
+  stroke-width: 2.4;
   stroke-dasharray: 10 7;
   animation: edge-flow 0.8s linear 3;
-  filter: drop-shadow(0 0 5px currentColor);
 }
 @keyframes edge-flow { to { stroke-dashoffset: -51; } }
 
-.edge-active.v-allow { stroke: var(--allow); color: var(--allow); }
-.edge-active.v-block { stroke: var(--block); color: var(--block); }
-.edge-active.v-pause { stroke: var(--pause); color: var(--pause); }
-.edge-active.v-rollback { stroke: var(--rollback); color: var(--rollback); }
-.edge-active.v-propose { stroke: var(--propose); color: var(--propose); }
+.edge-active.v-allow { stroke: var(--allow); }
+.edge-active.v-block { stroke: var(--block); }
+.edge-active.v-pause { stroke: var(--pause); }
+.edge-active.v-rollback { stroke: var(--rollback); }
+.edge-active.v-propose { stroke: var(--propose); }
 
 /* node pulse while a run is live */
 .node-live rect { animation: node-breathe 2.4s ease-in-out infinite; }
 @keyframes node-breathe {
-  0%, 100% { filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.25)); }
-  50% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.55)); }
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
 }

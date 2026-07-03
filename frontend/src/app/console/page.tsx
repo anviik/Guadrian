@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { FolderTree, Play, RotateCcw, ShieldCheck } from "lucide-react";
+import { Play, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import ActionLog from "@/components/action-log";
 import ApprovalModal from "@/components/approval-modal";
 import GraphView from "@/components/graph-view";
-import { Badge } from "@/components/ui/badge";
+import ThemeToggle from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { useGuardian } from "@/lib/use-guardian";
 import { cn } from "@/lib/utils";
 
@@ -23,100 +21,80 @@ export default function Console() {
   const running = state.status === "running";
 
   return (
-    <div className="relative min-h-screen">
-      <div className="bg-grid pointer-events-none absolute inset-x-0 top-0 h-64" />
-
-      {/* top bar */}
-      <header className="relative z-10 mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-6 py-5">
-        <Link href="/" className="flex items-center gap-2.5 pr-2">
-          <ShieldCheck className="size-5 text-primary" />
-          <span className="font-semibold tracking-[0.2em]">GUARDIAN</span>
-          <span className="hidden text-xs text-muted-foreground sm:inline">console</span>
+    <div className="min-h-screen">
+      {/* ── masthead ─────────────────────────────────────────────── */}
+      <header className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-6 pt-6 pb-4">
+        <Link href="/" className="flex items-baseline gap-3">
+          <span className="font-display text-2xl tracking-tight">Guardian</span>
+          <span className="spec">console</span>
         </Link>
 
+        <StatusWord connected={state.connected} status={state.status} />
+
         <div className="ml-auto flex flex-1 items-center justify-end gap-2.5 sm:flex-none">
-          <StatusPill connected={state.connected} status={state.status} />
           <Input
-            className="w-full max-w-sm sm:w-80"
+            className="w-full max-w-sm rounded-none border-0 border-b border-input bg-transparent px-1 font-mono text-[13px] shadow-none focus-visible:ring-0 focus-visible:border-primary sm:w-80"
             value={task}
             onChange={(e) => setTask(e.target.value)}
             disabled={running}
             placeholder="task for the worker agent…"
           />
           <Button
-            className="rounded-full font-semibold shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+            className="rounded-none border border-foreground bg-foreground font-medium text-background hover:bg-transparent hover:text-foreground"
             disabled={running || !state.connected}
             onClick={() => post("run", { task })}
           >
-            <Play className="size-4" /> Run
+            <Play className="size-3.5" /> Run
           </Button>
           <Button
             variant="outline"
-            className="rounded-full"
+            className="rounded-none"
             disabled={running || !state.connected}
             onClick={() => post("reset")}
           >
-            <RotateCcw className="size-4" /> Reset
+            <RotateCcw className="size-3.5" /> Reset
           </Button>
+          <ThemeToggle />
         </div>
       </header>
 
+      <div className="rule-t mx-auto max-w-7xl px-6" />
+
       {(state.mode || state.banner) && (
-        <div className="relative z-10 mx-auto max-w-7xl space-y-2 px-6 pb-2">
-          {state.mode && (
-            <p className="text-xs text-muted-foreground">agents: {state.mode}</p>
-          )}
+        <div className="mx-auto max-w-7xl space-y-2 px-6 pt-3">
+          {state.mode && <p className="spec">agents — {state.mode}</p>}
           {state.banner && (
-            <div className="animate-in fade-in rounded-lg border border-rollback/50 bg-rollback/10 px-4 py-2.5 text-sm text-rollback">
+            <div className="animate-in fade-in border-l-2 border-rollback bg-rollback/8 py-2 pl-4 pr-3 font-mono text-[12.5px] text-rollback">
               ⟲ {state.banner}
             </div>
           )}
         </div>
       )}
 
-      {/* panels */}
-      <main className="relative z-10 mx-auto grid max-w-7xl gap-4 px-6 pb-6 lg:grid-cols-[1.2fr_1fr]">
-        <div className="flex flex-col gap-4">
-          <Card className="glass rounded-2xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Agent graph
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <GraphView pulse={state.pulse} status={state.status} stackDepth={state.stackDepth} />
-            </CardContent>
-          </Card>
+      {/* ── panels ───────────────────────────────────────────────── */}
+      <main className="mx-auto grid max-w-7xl gap-x-10 gap-y-8 px-6 py-8 lg:grid-cols-[1.25fr_1fr]">
+        <div className="space-y-8">
+          <section>
+            <PanelHead n="01" title="agent graph" />
+            <GraphView pulse={state.pulse} status={state.status} stackDepth={state.stackDepth} />
+          </section>
 
-          <Card className="glass rounded-2xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                <FolderTree className="size-3.5" /> Sandbox contents
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <pre className="min-h-12 whitespace-pre-wrap rounded-lg bg-background/80 px-4 py-3 font-mono text-xs leading-relaxed">
-                {state.sandbox || "  (empty)"}
-              </pre>
-            </CardContent>
-          </Card>
+          <section>
+            <PanelHead n="02" title="sandbox contents" />
+            <pre className="min-h-12 whitespace-pre-wrap border border-border bg-card px-4 py-3 font-mono text-xs leading-relaxed">
+              {state.sandbox || "  (empty)"}
+            </pre>
+          </section>
         </div>
 
-        <Card className="glass rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Action log
-              {state.task && (
-                <span className="ml-2 normal-case tracking-normal text-foreground/70">
-                  — {state.task}
-                </span>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ActionLog log={state.log} />
-          </CardContent>
-        </Card>
+        <section>
+          <PanelHead
+            n="03"
+            title="ledger"
+            right={state.task ? `“${state.task}”` : undefined}
+          />
+          <ActionLog log={state.log} />
+        </section>
       </main>
 
       {state.status === "paused" && state.pending && (
@@ -128,42 +106,56 @@ export default function Console() {
         />
       )}
 
-      <footer className="relative z-10 mx-auto max-w-7xl px-6 pb-8">
-        <Separator className="mb-4" />
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          Scope honesty: rollback is demonstrated on a sandboxed filesystem + mock
-          APIs, where every action is genuinely reversible. The LLM judge is
-          probabilistic defense-in-depth alongside the deterministic rule layer, not
-          a guarantee.
+      <footer className="rule-t mx-auto max-w-7xl px-6 py-8">
+        <p className="max-w-2xl text-[12.5px] leading-relaxed text-muted-foreground">
+          <span className="font-mono">*</span> Rollback is demonstrated on a
+          sandboxed filesystem + mock APIs, where every action is genuinely
+          reversible. The LLM judge is probabilistic defense-in-depth alongside the
+          deterministic rule layer, not a guarantee.
         </p>
       </footer>
     </div>
   );
 }
 
-function StatusPill(props: { connected: boolean; status: string }) {
+function PanelHead(props: { n: string; title: string; right?: string }) {
+  return (
+    <div className="mb-3 flex items-baseline justify-between gap-4 border-b border-border pb-2">
+      <span className="spec">
+        <span className="mr-2 text-foreground/70">{props.n}</span>
+        {props.title}
+      </span>
+      {props.right && (
+        <span className="truncate font-display text-sm italic text-muted-foreground">
+          {props.right}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function StatusWord(props: { connected: boolean; status: string }) {
   const label = props.connected ? props.status : "offline";
   return (
-    <Badge
-      variant="outline"
+    <span
       className={cn(
-        "rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-widest",
-        label === "running" && "border-propose/60 text-propose",
-        label === "paused" && "border-pause/60 text-pause",
+        "font-mono text-[11px] uppercase tracking-[0.22em]",
+        label === "running" && "text-propose",
+        label === "paused" && "text-pause",
         label === "idle" && "text-muted-foreground",
-        label === "offline" && "border-block/60 text-block",
+        label === "offline" && "text-block",
       )}
     >
       <span
         className={cn(
-          "mr-1.5 inline-block size-1.5 rounded-full",
+          "mr-2 inline-block size-1.5 rounded-full align-middle",
           label === "running" && "animate-pulse bg-propose",
           label === "paused" && "bg-pause",
-          label === "idle" && "bg-muted-foreground",
+          label === "idle" && "bg-muted-foreground/60",
           label === "offline" && "bg-block",
         )}
       />
       {label}
-    </Badge>
+    </span>
   );
 }
