@@ -9,7 +9,7 @@ export interface LogEntry {
   action: Action | null;
   verdict: string; // allow | block | pause | rollback | denied
   reason: string;
-  stage?: string;  // rules | judge | human | rollback
+  stage?: string; // rules | judge | human | rollback
   result?: string;
 }
 
@@ -45,7 +45,16 @@ export interface Snapshot {
 
 /** Which edge of the graph to pulse, and in what verdict color. */
 export interface Pulse {
-  edge: string;    // "wg" | "ge" | "gw" | "gh" | "gr" | "rw"
+  edge: string; // "wg" | "ge" | "gw" | "gh" | "gr" | "rw"
   verdict: string; // allow | block | pause | rollback | propose
-  key: number;     // changes every pulse so the CSS animation retriggers
+  key: number; // changes every pulse so the CSS animation retriggers
+}
+
+/** In `next dev` the backend runs separately on :8000; in the one-command demo
+ *  the backend itself serves the static export, so same-origin works. */
+export function backendBase(): string {
+  if (typeof location !== "undefined" && location.port === "3000") {
+    return `${location.protocol}//${location.hostname}:8000`;
+  }
+  return "";
 }

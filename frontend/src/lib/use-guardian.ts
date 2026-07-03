@@ -1,5 +1,14 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Action, GuardianEvent, LogEntry, Pulse, Snapshot } from "./types";
+import {
+  backendBase,
+  type Action,
+  type GuardianEvent,
+  type LogEntry,
+  type Pulse,
+  type Snapshot,
+} from "./types";
 
 export interface GuardianState {
   connected: boolean;
@@ -45,8 +54,8 @@ export function useGuardian() {
     let retry: number | undefined;
 
     const connect = () => {
-      const proto = location.protocol === "https:" ? "wss" : "ws";
-      const ws = new WebSocket(`${proto}://${location.host}/ws`);
+      const base = backendBase() || `${location.protocol}//${location.host}`;
+      const ws = new WebSocket(base.replace(/^http/, "ws") + "/ws");
       wsRef.current = ws;
 
       ws.onopen = () => setState((s) => ({ ...s, connected: true }));
@@ -69,7 +78,7 @@ export function useGuardian() {
   }, []);
 
   const post = useCallback(async (path: string, body?: object) => {
-    await fetch(`/api/${path}`, {
+    await fetch(`${backendBase()}/api/${path}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body ?? {}),
@@ -157,7 +166,7 @@ function reduce(s: GuardianState, ev: GuardianEvent): GuardianState {
         ],
         stackDepth: ev.stack_depth ?? s.stackDepth,
         pulse: pulse("rw", "rollback"),
-        banner: `⟲ rolled back — ${ev.restored} restored to its pre-action state`,
+        banner: `Rolled back — ${ev.restored} restored to its pre-action state`,
       };
 
     case "paused":

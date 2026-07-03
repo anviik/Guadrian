@@ -1,0 +1,136 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ------------------------------------------------------------------ */
+/* Guardian theme: cyberpunk accents on an Apple-clean dark canvas.    */
+/* Neon is reserved for meaning (verdicts, live state); everything     */
+/* else stays quiet — glass panels, hairline borders, generous space.  */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* canvas */
+  --background: #06070b;
+  --foreground: #e7eaf0;
+
+  /* surfaces */
+  --card: #0c0e15;
+  --card-foreground: #e7eaf0;
+  --popover: #0c0e15;
+  --popover-foreground: #e7eaf0;
+
+  /* neon cyan is the product color */
+  --primary: #22d3ee;
+  --primary-foreground: #051014;
+  --secondary: #141824;
+  --secondary-foreground: #e7eaf0;
+  --muted: #12151f;
+  --muted-foreground: #8b93a7;
+  --accent: #141824;
+  --accent-foreground: #e7eaf0;
+  --destructive: #f85149;
+  --destructive-foreground: #fff1f0;
+
+  --border: rgba(139, 147, 167, 0.16);
+  --input: rgba(139, 147, 167, 0.22);
+  --ring: rgba(34, 211, 238, 0.6);
+
+  --radius: 0.75rem;
+
+  /* verdict palette (shared by graph, badges, cards) */
+  --allow: #34d399;
+  --block: #fb5e57;
+  --pause: #fbbf24;
+  --rollback: #c084fc;
+  --propose: #38bdf8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-allow: var(--allow);
+  --color-block: var(--block);
+  --color-pause: var(--pause);
+  --color-rollback: var(--rollback);
+  --color-propose: var(--propose);
+
+  --font-sans: var(--font-geist-sans), -apple-system, "SF Pro Text", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* faint cyber-grid used behind the landing hero and console header */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 40%, transparent 100%);
+}
+
+/* neon text — used sparingly */
+.text-glow-cyan { text-shadow: 0 0 24px rgba(34, 211, 238, 0.45); }
+
+/* glass panel */
+.glass {
+  background: linear-gradient(180deg, rgba(20, 24, 36, 0.72), rgba(12, 14, 21, 0.86));
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+}
+
+/* ---- live graph edge animation (SVG) ---- */
+.edge {
+  fill: none;
+  stroke: rgba(139, 147, 167, 0.28);
+  stroke-width: 1.5;
+  transition: stroke 0.3s ease;
+}
+.edge-faint { stroke-dasharray: 3 5; opacity: 0.55; }
+.edge-active {
+  stroke-width: 2.5;
+  stroke-dasharray: 10 7;
+  animation: edge-flow 0.8s linear 3;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+@keyframes edge-flow { to { stroke-dashoffset: -51; } }
+
+.edge-active.v-allow { stroke: var(--allow); color: var(--allow); }
+.edge-active.v-block { stroke: var(--block); color: var(--block); }
+.edge-active.v-pause { stroke: var(--pause); color: var(--pause); }
+.edge-active.v-rollback { stroke: var(--rollback); color: var(--rollback); }
+.edge-active.v-propose { stroke: var(--propose); color: var(--propose); }
+
+/* node pulse while a run is live */
+.node-live rect { animation: node-breathe 2.4s ease-in-out infinite; }
+@keyframes node-breathe {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.25)); }
+  50% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.55)); }
+}

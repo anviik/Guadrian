@@ -43,14 +43,15 @@ cd ../frontend && npm install && npm run build
 
 # 3. Run
 cd ../backend && uvicorn server:app --port 8000
-# open http://127.0.0.1:8000 — press ▶ Run, approve/deny the email when it pauses
+# open http://127.0.0.1:8000 — landing page, then Launch console and press ▶ Run;
+# approve/deny the email when it pauses
 ```
 
 Terminal-only demo (no frontend needed): `python main.py` from `backend/` prints
 the full verdict trace and the sandbox contents, including the on-disk rollback.
 
-Frontend development with hot reload: `npm run dev` in `frontend/` (proxies to the
-backend on :8000).
+Frontend development with hot reload: `npm run dev` in `frontend/` (port 3000,
+talks to the backend on :8000).
 
 ### Using a real LLM
 
@@ -79,11 +80,11 @@ backend/
   tests/     # policy, sandbox, and end-to-end graph tests
   main.py    # terminal demo entry point
   server.py  # FastAPI + WebSocket streaming server (serves frontend/dist)
-frontend/    # React + Vite + TS live graph, action log, approval modal
+frontend/    # Next.js + shadcn/ui: landing page + live console (graph, log, approvals)
 docs/        # private walkthrough notes + roadmap
 sandbox/     # (created at runtime, gitignored) the worker's target environment
 ```
 
 ## Stack
 
-LangGraph · OpenAI or Claude API (auto-detected from `.env`) · FastAPI · WebSockets · React + Vite (TS) · YAML
+LangGraph · OpenAI or Claude API (auto-detected from `.env`) · FastAPI · WebSockets · Next.js + shadcn/ui (TS) · YAML

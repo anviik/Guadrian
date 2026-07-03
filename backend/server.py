@@ -8,6 +8,10 @@ Run it (from backend/):
 
     uvicorn server:app --reload --port 8000
 
+In development the Next.js frontend runs separately (`npm run dev`, port 3000)
+and talks to this server cross-origin; the built export (frontend/out) is served
+by this app directly.
+
 Endpoints:
     GET  /api/state    current session snapshot (also sent on WS connect)
     POST /api/run      {"task": "..."} start a run (409 if one is running)
@@ -184,7 +188,7 @@ class Session:
 app = FastAPI(title="Guardian")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -247,6 +251,7 @@ async def websocket(ws: WebSocket):
 
 
 # Serve the built frontend (if present) for a one-command demo.
-_DIST = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+# `npm run build` in frontend/ produces a Next.js static export in out/.
+_DIST = Path(__file__).resolve().parents[1] / "frontend" / "out"
 if _DIST.is_dir():
     app.mount("/", StaticFiles(directory=_DIST, html=True), name="frontend")
